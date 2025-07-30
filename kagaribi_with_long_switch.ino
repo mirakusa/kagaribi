@@ -78,18 +78,19 @@ void setup() {
 
 void processFlame(FlameData &flame, CRGB leds[]) {
   flame.heightTimer++;
-  // タイマーの上限を短縮（50から30に）して、高さの変更頻度を増加
-  if (flame.heightTimer > 30 + flame.phaseOffset / 8) {
+  // より頻繁に高さを変更（15フレームごと）
+  if (flame.heightTimer > 15 + flame.phaseOffset / 10) {
     flame.heightTimer = 0;
-    // 高さの範囲を拡大（8〜18から5〜20に）
-    flame.targetHeight = random8(5, 20);
+    // 高さの範囲を最大化（3〜NUM_LEDSまで）
+    flame.targetHeight = random8(3, NUM_LEDS);
   }
   
-  // 高さ変化の速度を向上（30%から50%に）
-  if (flame.flameHeight < flame.targetHeight) {
-    if (random8(100) < 50) flame.flameHeight++;
-  } else if (flame.flameHeight > flame.targetHeight) {
-    if (random8(100) < 50) flame.flameHeight--;
+  // 高さ変化を高速化（1フレームで最大3段階変化）
+  int diff = flame.targetHeight - flame.flameHeight;
+  if (diff > 0) {
+    flame.flameHeight += min(3, diff);  // 最大3段階上昇
+  } else if (diff < 0) {
+    flame.flameHeight -= min(3, -diff); // 最大3段階下降
   }
   
   for (int i = 0; i < NUM_LEDS; i++) {
